@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
     s.name             = "mParticle-Responsys"
     s.version          = "1.0.0"
-    s.summary          = "PushIO integration for mParticle"
+    s.summary          = "Oracle Responsys Push integration for mParticle"
 
     s.description      = <<-DESC
-                       This is the PushIO integration for mParticle
+                       This is the Oracle Responsys Push integration for mParticle
                        DESC
 
     s.homepage         = "https://docs.oracle.com/cloud/latest/marketingcs_gs/OMCFB/"
