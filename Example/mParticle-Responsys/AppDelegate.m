@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "mParticle.h"
 
 @interface AppDelegate ()
 
@@ -14,9 +15,21 @@
 
 @implementation AppDelegate
 
+NSString* const appKey = @"app_key";
+NSString* const appSecret = @"app_secret";
+NSString* const emailAddress = @"email_address";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+    MParticleOptions *mParticleOptions = [MParticleOptions optionsWithKey:appKey
+                                                                   secret:appSecret];
+    
+    MPIdentityApiRequest *request = [MPIdentityApiRequest requestWithEmptyUser];
+    request.email = emailAddress;
+    mParticleOptions.identifyRequest = request;
+    mParticleOptions.onIdentifyComplete = ^(MPIdentityApiResult * _Nullable apiResult, NSError * _Nullable error) {
+        NSLog(@"Identify complete. userId = %@ error = %@", apiResult.user.userId, error);
+    };
+    [[MParticle sharedInstance] startWithOptions:mParticleOptions];
     return YES;
 }
 
