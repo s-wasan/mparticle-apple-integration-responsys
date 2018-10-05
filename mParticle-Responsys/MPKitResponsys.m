@@ -73,10 +73,13 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
         NSError *error = nil;
         BOOL configured = [[PushIOManager sharedInstance] configureWithAPIKey:apiKey accountToken:accountToken error:&error];
         if (configured) {
+            [[PushIOManager sharedInstance] setLogLevel:PIOLogLevelVerbose];
             NSLog(@"Responsys SDK configured successfully!");
-            [[PushIOManager sharedInstance]registerForAllRemoteNotificationTypes:^(NSError *error, NSString *response) {
+            [[PushIOManager sharedInstance] registerForAllRemoteNotificationTypes:^(NSError *error, NSString *response) {
                 if(nil == error){
-                    NSLog(@"Registration successful!");
+                    [[PushIOManager sharedInstance] setMessageCenterEnabled:YES];
+                    [[PushIOManager sharedInstance] setInAppMessageFetchEnabled:YES];
+                    NSLog(@"Registration successfull!");
                 }else{
                     NSLog(@"Failed to register, error: %@", error);
                 }
