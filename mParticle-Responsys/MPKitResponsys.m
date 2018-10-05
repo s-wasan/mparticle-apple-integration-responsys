@@ -73,7 +73,14 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
         NSError *error = nil;
         BOOL configured = [[PushIOManager sharedInstance] configureWithAPIKey:apiKey accountToken:accountToken error:&error];
         if (configured) {
-            NSLog(@"PushIO SDK configured successfully!");
+            NSLog(@"Responsys SDK configured successfully!");
+            [[PushIOManager sharedInstance]registerForAllRemoteNotificationTypes:^(NSError *error, NSString *response) {
+                if(nil == error){
+                    NSLog(@"Registration successful!");
+                }else{
+                    NSLog(@"Failed to register, error: %@", error);
+                }
+            }];
         }else{
             NSLog(@"Unable to configure the PushIO SDK, check the APIKey and Account token and try again");
         }
