@@ -140,5 +140,52 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
     return [[MPKitExecStatus alloc] initWithSDKCode:self.class.kitCode returnCode:returnCode];
 }
 
-@end
+- (nonnull MPKitExecStatus *)continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(void(^ _Nonnull)(NSArray * _Nullable restorableObjects))restorationHandler{
+    [[PushIOManager sharedInstance] continueUserActivity:userActivity restorationHandler:restorationHandler];
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
 
+- (nonnull MPKitExecStatus *)didUpdateUserActivity:(nonnull NSUserActivity *)userActivity{
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (nonnull MPKitExecStatus *)didBecomeActive{
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (nonnull MPKitExecStatus *)failedToRegisterForUserNotifications:(nullable NSError *)error{
+    [[PushIOManager sharedInstance] didFailToRegisterForRemoteNotificationsWithError:error];
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (nonnull MPKitExecStatus *)handleActionWithIdentifier:(nonnull NSString *)identifier forRemoteNotification:(nonnull NSDictionary *)userInfo{
+    [[PushIOManager sharedInstance] handleActionWithIdentifier:identifier forRemoteNotification:userInfo completionHandler:nil];
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (nonnull MPKitExecStatus *)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nonnull NSDictionary *)userInfo withResponseInfo:(nonnull NSDictionary *)responseInfo{
+    [[PushIOManager sharedInstance] handleActionWithIdentifier:identifier forRemoteNotification:userInfo withResponseInfo:responseInfo completionHandler:nil];
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (nonnull MPKitExecStatus *)openURL:(nonnull NSURL *)url options:(nullable NSDictionary<NSString *, id> *)options{
+    [[PushIOManager sharedInstance] openURL:url sourceApplication:nil annotation:nil];
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (nonnull MPKitExecStatus *)openURL:(nonnull NSURL *)url sourceApplication:(nullable NSString *)sourceApplication annotation:(nullable id)annotation{
+    [[PushIOManager sharedInstance] openURL:url sourceApplication:sourceApplication annotation:annotation];
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (nonnull MPKitExecStatus *)receivedUserNotification:(nonnull NSDictionary *)userInfo{
+    [[PushIOManager sharedInstance] didReceiveRemoteNotification:userInfo];
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (nonnull MPKitExecStatus *)setDeviceToken:(nonnull NSData *)deviceToken{
+    [[PushIOManager sharedInstance] didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+    return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+@end
