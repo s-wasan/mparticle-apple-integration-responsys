@@ -136,10 +136,6 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
-- (MPKitExecStatus*) execStatus:(MPKitReturnCode)returnCode {
-    return [[MPKitExecStatus alloc] initWithSDKCode:self.class.kitCode returnCode:returnCode];
-}
-
 - (nonnull MPKitExecStatus *)continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(void(^ _Nonnull)(NSArray * _Nullable restorableObjects))restorationHandler{
     [[PushIOManager sharedInstance] continueUserActivity:userActivity restorationHandler:restorationHandler];
     return [self execStatus:MPKitReturnCodeSuccess];
@@ -186,6 +182,10 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
 - (nonnull MPKitExecStatus *)setDeviceToken:(nonnull NSData *)deviceToken{
     [[PushIOManager sharedInstance] didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
     return [self execStatus:MPKitReturnCodeSuccess];
+}
+
+- (MPKitExecStatus*) execStatus:(MPKitReturnCode)returnCode {
+    return [[MPKitExecStatus alloc] initWithSDKCode:self.class.kitCode returnCode:returnCode];
 }
 
 @end
