@@ -30,10 +30,16 @@
 NSString * const PIOConfigurationAPIKey = @"apiKey";
 NSString * const PIOConfigurationAccountToken = @"accountToken";
 
+@interface MPKitResponsys(){
+    PushIOManager *_pioManager;
+}
+
+@end
+
 @implementation MPKitResponsys
 
 +(void) load{
-    MPKitRegister *pioKitRegister = [[MPKitRegister alloc] initWithName:@"Oracle PushIO" className: @"MPKitResponsys"];
+    MPKitRegister *pioKitRegister = [[MPKitRegister alloc] initWithName:@"Oracle Responsys PushIO" className: @"MPKitResponsys"];
     [MParticle registerExtension:pioKitRegister];
 }
 
@@ -68,17 +74,17 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
     
     dispatch_once(&kitPredicate, ^{
         self->_started = YES;
-        NSString *apiKey = self.configuration[PIOConfigurationAPIKey];
-        NSString *accountToken = self.configuration[PIOConfigurationAccountToken];
+    NSString *apiKey = self.configuration[PIOConfigurationAPIKey];
+    NSString *accountToken = self.configuration[PIOConfigurationAccountToken];
         NSError *error = nil;
-        BOOL configured = [[PushIOManager sharedInstance] configureWithAPIKey:apiKey accountToken:accountToken error:&error];
+        BOOL configured = [[self pushIOManager] configureWithAPIKey:apiKey accountToken:accountToken error:&error];
         if (configured) {
-            [[PushIOManager sharedInstance] setLogLevel:PIOLogLevelVerbose];
+            [[self pushIOManager] setLogLevel:PIOLogLevelVerbose];
             NSLog(@"Responsys SDK configured successfully!");
-            [[PushIOManager sharedInstance] registerForAllRemoteNotificationTypes:^(NSError *error, NSString *response) {
+            [[self pushIOManager] registerForAllRemoteNotificationTypes:^(NSError *error, NSString *response) {
                 if(nil == error){
-                    [[PushIOManager sharedInstance] setMessageCenterEnabled:YES];
-                    [[PushIOManager sharedInstance] setInAppMessageFetchEnabled:YES];
+//                    [[self pushIOManager] setMessageCenterEnabled:YES];
+//                    [[self pushIOManager] setInAppMessageFetchEnabled:YES];
                     NSLog(@"Registration successfull!");
                 }else{
                     NSLog(@"Failed to register, error: %@", error);
@@ -95,10 +101,16 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
 }
 
 - (id const)kitInstance {
-    return self.started ? [PushIOManager sharedInstance] : nil;
+    return self.started ? [self pushIOManager] : nil;
 }
 
 
+-(PushIOManager *)pushIOManager{
+    if (nil == _pioManager) {
+        _pioManager = [PushIOManager sharedInstance];
+    }
+    return _pioManager;
+}
 #pragma mark - MPKitInstanceProtocol Lifecycle Methods
 
 - (instancetype _Nonnull) init {
@@ -147,7 +159,7 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
 }
 
 - (nonnull MPKitExecStatus *)continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(void(^ _Nonnull)(NSArray * _Nullable restorableObjects))restorationHandler{
-    [[PushIOManager sharedInstance] continueUserActivity:userActivity restorationHandler:restorationHandler];
+    [[self pushIOManager] continueUserActivity:userActivity restorationHandler:restorationHandler];
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
@@ -160,37 +172,37 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
 }
 
 - (nonnull MPKitExecStatus *)failedToRegisterForUserNotifications:(nullable NSError *)error{
-    [[PushIOManager sharedInstance] didFailToRegisterForRemoteNotificationsWithError:error];
+    [[self pushIOManager] didFailToRegisterForRemoteNotificationsWithError:error];
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
 - (nonnull MPKitExecStatus *)handleActionWithIdentifier:(nonnull NSString *)identifier forRemoteNotification:(nonnull NSDictionary *)userInfo{
-    [[PushIOManager sharedInstance] handleActionWithIdentifier:identifier forRemoteNotification:userInfo completionHandler:nil];
+    [[self pushIOManager] handleActionWithIdentifier:identifier forRemoteNotification:userInfo completionHandler:nil];
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
 - (nonnull MPKitExecStatus *)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nonnull NSDictionary *)userInfo withResponseInfo:(nonnull NSDictionary *)responseInfo{
-    [[PushIOManager sharedInstance] handleActionWithIdentifier:identifier forRemoteNotification:userInfo withResponseInfo:responseInfo completionHandler:nil];
+    [[self pushIOManager] handleActionWithIdentifier:identifier forRemoteNotification:userInfo withResponseInfo:responseInfo completionHandler:nil];
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
 - (nonnull MPKitExecStatus *)openURL:(nonnull NSURL *)url options:(nullable NSDictionary<NSString *, id> *)options{
-    [[PushIOManager sharedInstance] openURL:url sourceApplication:nil annotation:nil];
+    [[self pushIOManager] openURL:url sourceApplication:nil annotation:nil];
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
 - (nonnull MPKitExecStatus *)openURL:(nonnull NSURL *)url sourceApplication:(nullable NSString *)sourceApplication annotation:(nullable id)annotation{
-    [[PushIOManager sharedInstance] openURL:url sourceApplication:sourceApplication annotation:annotation];
+    [[self pushIOManager] openURL:url sourceApplication:sourceApplication annotation:annotation];
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
 - (nonnull MPKitExecStatus *)receivedUserNotification:(nonnull NSDictionary *)userInfo{
-    [[PushIOManager sharedInstance] didReceiveRemoteNotification:userInfo];
+    [[self pushIOManager] didReceiveRemoteNotification:userInfo];
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
 - (nonnull MPKitExecStatus *)setDeviceToken:(nonnull NSData *)deviceToken{
-    [[PushIOManager sharedInstance] didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+    [[self pushIOManager] didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
