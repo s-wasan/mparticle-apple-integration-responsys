@@ -8,6 +8,7 @@
 
 #import "AppDelegate.h"
 #import "mParticle.h"
+#import "MPKitResponsys.h"
 
 @interface AppDelegate ()
 
@@ -53,6 +54,9 @@ NSString* const emailAddress = @"email_address";
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    [self trackInAppMessageEvent];
+    [self setUserPreferences];
+    [self setCommerceEvent];
 }
 
 
@@ -60,5 +64,42 @@ NSString* const emailAddress = @"email_address";
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
+
+-(void) trackInAppMessageEvent{
+    MPEvent *inAppEvent = [[MPEvent alloc] initWithName:ResponsysEventTypeIAMInAppPurchase type:MPEventTypeTransaction];
+    MPEvent *premiumEvent = [[MPEvent alloc] initWithName:ResponsysEventTypeIAMPremium type:MPEventTypeTransaction];
+    MPEvent *socialEvent = [[MPEvent alloc] initWithName:ResponsysEventTypeIAMSocial type:MPEventTypeSocial];
+    MPEvent *iapEvent = [[MPEvent alloc] initWithName:ResponsysEventTypeIAMPurchase type:MPEventTypeTransaction];
+    MPEvent *otherEvent = [[MPEvent alloc] initWithName:ResponsysEventTypeIAMOther type:MPEventTypeOther];
+    [[MParticle sharedInstance] logEvent:inAppEvent];
+    [[MParticle sharedInstance] logEvent:premiumEvent];
+    [[MParticle sharedInstance] logEvent:socialEvent];
+    [[MParticle sharedInstance] logEvent:iapEvent];
+    [[MParticle sharedInstance] logEvent:otherEvent];
+}
+
+-(void) setUserPreferences{
+    NSDictionary *preferences = @{@"Sports":@"Cricket",@"News":@"Tech"};
+    MPEvent *preferenceEvent = [[MPEvent alloc] initWithName:ResponsysEventTypePreference type:MPEventTypeOther];
+    preferenceEvent.info = preferences;
+    [[MParticle sharedInstance] logEvent:preferenceEvent];
+}
+
+-(void) setCommerceEvent{
+    MPProduct *product = [[MPProduct alloc] init];
+    product.brand = @"Sample brand";
+    product.category = @"Sample Category";
+    product.couponCode = @"Sample CouponCode";
+    product.name = @"Sample Name";
+    product.price = @100;
+    product.sku = @"Sample SKU";
+    product.variant = @"Sample Variant";
+    product.quantity = @10;
+    MPTransactionAttributes *attributes = [[MPTransactionAttributes alloc] init];
+    attributes.transactionId = @"Sample-Transaction-Identifier";
+    MPCommerceEvent *commerceEvent = [[MPCommerceEvent alloc] initWithAction:MPCommerceEventActionPurchase product:product];
+    commerceEvent.transactionAttributes = attributes;
+    [[MParticle sharedInstance] logCommerceEvent:commerceEvent];
+}
 
 @end
