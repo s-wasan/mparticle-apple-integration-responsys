@@ -29,6 +29,14 @@
 
 NSString * const PIOConfigurationAPIKey = @"apiKey";
 NSString * const PIOConfigurationAccountToken = @"accountToken";
+NSString * const ResponsysEventTypeIAMInAppPurchase = @"ResponsysEventTypeIAMInAppPurchase";
+NSString * const ResponsysEventTypeIAMPremium = @"ResponsysEventTypeIAMPremium";
+NSString * const ResponsysEventTypeIAMSocial = @"ResponsysEventTypeIAMSocial";
+NSString * const ResponsysEventTypeIAMPurchase = @"ResponsysEventTypeIAMPurchase";
+NSString * const ResponsysEventTypeIAMOther = @"ResponsysEventTypeIAMOther";
+
+NSString * const ResponsysEventTypePreference = @"ResponsysEventTypePreference";
+NSString * const ResponsysEvent = @"ResponsysEvent";
 
 @interface MPKitResponsys(){
     PushIOManager *_pioManager;
@@ -80,18 +88,11 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
         BOOL configured = [[self pushIOManager] configureWithAPIKey:apiKey accountToken:accountToken error:&error];
         if (configured) {
             [[self pushIOManager] setLogLevel:PIOLogLevelVerbose];
-            NSLog(@"Responsys SDK configured successfully!");
             [[self pushIOManager] registerForAllRemoteNotificationTypes:^(NSError *error, NSString *response) {
-                if(nil == error){
-//                    [[self pushIOManager] setMessageCenterEnabled:YES];
-//                    [[self pushIOManager] setInAppMessageFetchEnabled:YES];
-                    NSLog(@"Registration successfull!");
-                }else{
-                    NSLog(@"Failed to register, error: %@", error);
-                }
+                //Error populated if failed to register.
             }];
         }else{
-            NSLog(@"Unable to configure the PushIO SDK, check the APIKey and Account token and try again");
+            //Failed to configure. No retrial needed. Check the APIKey and AccountToken and try again.
         }
     });
 }
@@ -147,12 +148,51 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
 }
 
 - (MPKitExecStatus *)logEvent:(MPEvent *)mpEvent {
+    NSString *eventName = mpEvent.name;
+    if(nil != eventName ){
+        NSArray *inAppEvents = @[ResponsysEventTypeIAMInAppPurchase, ResponsysEventTypeIAMPremium, ResponsysEventTypeIAMSocial, ResponsysEventTypeIAMPurchase, ResponsysEventTypeIAMOther];
+        if([inAppEvents containsObject:eventName]){
+            [[self pushIOManager] trackEvent:eventName];
+        }else if ([eventName isEqualToString:ResponsysEventTypePreference]){
+            NSDictionary *eventInfo = [mpEvent.info copy];
+            [self savePreference: eventInfo];
+        }
+    }
     return [self execStatus:MPKitReturnCodeSuccess];
 }
 
-- (nonnull MPKitExecStatus *)logCommerceEvent:(nonnull MPCommerceEvent *)commerceEvent {
+- (MPKitExecStatus *)logCommerceEvent:(MPCommerceEvent *)commerceEvent{
+    NSString *commerceEventAction = nil;
+    switch (commerceEvent.action) {
+        case MPCommerceEventActionPurchase:
+            commerceEventAction = @"$PurchasedCart";
+            break;
+        case MPCommerceEventActionAddToCart:
+            commerceEventAction = @"$AddedItemToCart";
+            break;
+        case MPCommerceEventActionRemoveFromCart:
+            commerceEventAction = @"$RemovedItemFromCart";
+            break;
+        case MPCommerceEventActionViewDetail:
+            commerceEventAction = @"$Browsed";
+            break;
+        case MPCommerceEventActionCheckout:
+            commerceEventAction = @"$UpdatedStageOfCart";
+            break;
+            //TODO: Need to find the options for search, as it's not availablewith MPCommerceEventAction type.
+//        case MPCommerceEventActionS:
+//            commerceEventAction = @"$Searched"
+//            break;
+        default:
+            break;
+    }
+    if(nil != commerceEventAction){
+        [self trackResponsysEvent: commerceEventAction products:commerceEvent.products];
+    }
     return [self execStatus:MPKitReturnCodeSuccess];
+
 }
+
 
 - (MPKitExecStatus *)logScreen:(MPEvent *)mpEvent {
     return [self execStatus:MPKitReturnCodeSuccess];
@@ -208,6 +248,29 @@ NSString * const PIOConfigurationAccountToken = @"accountToken";
 
 - (MPKitExecStatus*) execStatus:(MPKitReturnCode)returnCode {
     return [[MPKitExecStatus alloc] initWithSDKCode:self.class.kitCode returnCode:returnCode];
+}
+
+#pragma mark Events
+
+-(void) savePreference:(NSDictionary *)preferences{
+    for (NSString* prefKey in preferences){
+        NSLog(@"Key: %@", prefKey);
+        NSString *prefValue = preferences[prefKey];
+        NSError *prefError = nil;
+        [[self pushIOManager] declarePreference:prefKey label:prefKey type:PIOPreferenceTypeString error:&prefError];
+        [[self pushIOManager] setStringPreference:prefValue forKey:prefKey];
+    }
+}
+
+-(void)trackResponsysEvent: (NSString *)eventName products:(NSArray *)products{
+    if (nil != eventName && products.count > 0) {
+        for (MPProduct *product in products) {
+            NSDictionary *productProperties = product.dictionaryRepresentation;
+            if(nil != productProperties){
+                [[self pushIOManager] trackEvent:eventName properties:productProperties];
+            }
+        }
+    }
 }
 
 @end

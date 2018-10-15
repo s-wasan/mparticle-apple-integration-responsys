@@ -12,6 +12,15 @@
 #import "mParticle.h"
 #endif
 
+FOUNDATION_EXPORT NSString * _Nonnull const ResponsysEventTypeIAMInAppPurchase;
+FOUNDATION_EXPORT NSString * _Nonnull const ResponsysEventTypeIAMPremium;
+FOUNDATION_EXPORT NSString * _Nonnull const ResponsysEventTypeIAMSocial;
+FOUNDATION_EXPORT NSString * _Nonnull const ResponsysEventTypeIAMPurchase;
+FOUNDATION_EXPORT NSString * _Nonnull const ResponsysEventTypeIAMOther;
+
+FOUNDATION_EXPORT NSString * _Nonnull const ResponsysEventTypePreference;
+FOUNDATION_EXPORT NSString * _Nonnull const ResponsysEvent;
+
 @interface MPKitResponsys : NSObject <MPKitProtocol>
 
 @property (nonatomic, strong, nonnull) NSDictionary *configuration;
