@@ -29,7 +29,6 @@
 
 NSString * const PIOConfigurationAPIKey = @"apiKey";
 NSString * const PIOConfigurationAccountToken = @"accountToken";
-NSString * const ResponsysEventTypeIAMInAppPurchase = @"ResponsysEventTypeIAMInAppPurchase";
 NSString * const ResponsysEventTypeIAMPremium = @"ResponsysEventTypeIAMPremium";
 NSString * const ResponsysEventTypeIAMSocial = @"ResponsysEventTypeIAMSocial";
 NSString * const ResponsysEventTypeIAMPurchase = @"ResponsysEventTypeIAMPurchase";
@@ -149,10 +148,11 @@ NSString * const ResponsysEvent = @"ResponsysEvent";
 
 - (MPKitExecStatus *)logEvent:(MPEvent *)mpEvent {
     NSString *eventName = mpEvent.name;
+
     if(nil != eventName ){
-        NSArray *inAppEvents = @[ResponsysEventTypeIAMInAppPurchase, ResponsysEventTypeIAMPremium, ResponsysEventTypeIAMSocial, ResponsysEventTypeIAMPurchase, ResponsysEventTypeIAMOther];
+        NSArray *inAppEvents = @[ResponsysEventTypeIAMPremium, ResponsysEventTypeIAMSocial, ResponsysEventTypeIAMPurchase, ResponsysEventTypeIAMOther];
         if([inAppEvents containsObject:eventName]){
-            [[self pushIOManager] trackEvent:eventName];
+            [self trackEngagementMetric: eventName];
         }else if ([eventName isEqualToString:ResponsysEventTypePreference]){
             NSDictionary *eventInfo = [mpEvent.info copy];
             [self savePreference: eventInfo];
@@ -179,7 +179,7 @@ NSString * const ResponsysEvent = @"ResponsysEvent";
         case MPCommerceEventActionCheckout:
             commerceEventAction = @"$UpdatedStageOfCart";
             break;
-            //TODO: Need to find the options for search, as it's not availablewith MPCommerceEventAction type.
+            //TODO: Need to find the options for search, as it's not available with MPCommerceEventAction type.
 //        case MPCommerceEventActionS:
 //            commerceEventAction = @"$Searched"
 //            break;
@@ -271,6 +271,20 @@ NSString * const ResponsysEvent = @"ResponsysEvent";
             }
         }
     }
+}
+
+-(void) trackEngagementMetric:(NSString *)engagementMetric{
+    PushIOEngagementMetrics engagementType = PUSHIO_ENGAGEMENT_METRIC_ACTIVE_SESSION;
+    if ([engagementMetric isEqualToString:ResponsysEventTypeIAMPremium]) {
+        engagementType = PUSHIO_ENGAGEMENT_METRIC_PREMIUM_CONTENT;
+    } else if ([engagementMetric isEqualToString:ResponsysEventTypeIAMSocial]) {
+        engagementType = PUSHIO_ENGAGEMENT_METRIC_SOCIAL;
+    } else if ([engagementMetric isEqualToString:ResponsysEventTypeIAMPurchase]) {
+        engagementType = PUSHIO_ENGAGEMENT_METRIC_INAPP_PURCHASE;
+    } else if ([engagementMetric isEqualToString:ResponsysEventTypeIAMOther]) {
+        engagementType = PUSHIO_ENGAGEMENT_METRIC_OTHER;
+    }
+    [[self pushIOManager] trackEngagementMetric:engagementType];
 }
 
 @end
