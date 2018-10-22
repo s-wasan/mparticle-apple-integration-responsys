@@ -100,6 +100,10 @@ NSString * const ResponsysEvent = @"ResponsysEvent";
     return @102;
 }
 
+- (id const)providerKitInstance {
+    return [self started] ? [self pushIOManager] : nil;
+}
+
 - (id const)kitInstance {
     return self.started ? [self pushIOManager] : nil;
 }
