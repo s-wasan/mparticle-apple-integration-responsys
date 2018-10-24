@@ -183,10 +183,6 @@ NSString * const ResponsysEvent = @"ResponsysEvent";
         case MPCommerceEventActionCheckout:
             commerceEventAction = @"$UpdatedStageOfCart";
             break;
-            //TODO: Need to find the options for search, as it's not available with MPCommerceEventAction type.
-//        case MPCommerceEventActionS:
-//            commerceEventAction = @"$Searched"
-//            break;
         default:
             break;
     }
